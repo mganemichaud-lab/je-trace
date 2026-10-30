@@ -11,6 +11,7 @@ Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capita
 
 - `js/glyphs.js` – the letter model: shape and stroke order of every character. Edit a line there to change how a letter is written.
 - `js/app.js` – screens, finger checking, demo animation.
+- `planche.html` – review sheet of every character with numbered, coloured strokes (printable).
 - `style.css`, `index.html`
 - `manifest.webmanifest`, `sw.js`, `icons/` – home-screen icon and offline use.
 
