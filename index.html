@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>J'écris en script</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="J'écris">
+  <meta name="theme-color" content="#faf8f3">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Accueil -->
+  <section id="home" class="screen">
+    <header class="bar">
+      <h1 class="title">J'écris en script</h1>
+    </header>
+    <main class="sets" id="sets"></main>
+  </section>
+
+  <!-- Liste des lettres d'une série -->
+  <section id="list" class="screen" hidden>
+    <header class="bar">
+      <a class="btn" href="#" aria-label="Accueil">
+        <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10"/></svg>
+      </a>
+      <h1 class="title" id="list-title"></h1>
+      <span class="btn-space"></span>
+    </header>
+    <main class="grid" id="grid"></main>
+  </section>
+
+  <!-- Tracer une lettre -->
+  <section id="trace" class="screen" hidden>
+    <header class="bar">
+      <a class="btn" id="to-list" href="#" aria-label="Toutes les lettres">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+      </a>
+      <div class="nav">
+        <button class="btn" id="prev" aria-label="Précédente">
+          <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <span class="current" id="current"></span>
+        <button class="btn" id="next" aria-label="Suivante">
+          <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <div class="tools">
+        <button class="btn" id="listen" aria-label="Écouter">
+          <svg viewBox="0 0 24 24"><path d="M4 9.5h4L13 5v14l-5-4.5H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        </button>
+        <button class="btn" id="watch" aria-label="Regarder">
+          <svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+        <button class="btn" id="restart" aria-label="Recommencer">
+          <svg viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4.5H9"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="board" id="board">
+      <canvas id="canvas"></canvas>
+      <div class="win" id="win" hidden>
+        <span class="win-check">
+          <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+        </span>
+        <button class="btn big" id="again" aria-label="Encore">
+          <svg viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4v4.5H9"/></svg>
+        </button>
+        <button class="btn big primary" id="go-next" aria-label="Suivante">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/glyphs.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
