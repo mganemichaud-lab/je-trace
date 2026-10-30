@@ -1,6 +1,6 @@
 {
-  "name": "J'écris en script",
-  "short_name": "J'écris",
+  "name": "Je trace",
+  "short_name": "Je trace",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

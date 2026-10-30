@@ -16,7 +16,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   // ---- Progress, remembered on this device ----
-  var STORE = 'jecris-script-done';
+  var STORE = 'jetrace-done';
   var done = (function () {
     try { return new Set(JSON.parse(localStorage.getItem(STORE) || '[]')); } catch (e) { return new Set(); }
   })();
@@ -453,5 +453,5 @@
   }
 
   // For testing in the browser console
-  window.ecris = { state: function () { return T; }, view: function () { return view; } };
+  window.jetrace = { state: function () { return T; }, view: function () { return view; } };
 })();

@@ -1,4 +1,4 @@
-# J'écris en script
+# Je trace
 
 Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capitals A–Z and numbers 0–9.
 
