@@ -24,6 +24,11 @@
     try { localStorage.setItem(STORE, JSON.stringify(Array.from(done))); } catch (e) {}
   }
 
+  // Calm mode (plain ink) or festive mode (flowing rainbow ink and sparkles)
+  var FUN_KEY = 'jetrace-fun';
+  var fun = false;
+  try { fun = localStorage.getItem(FUN_KEY) === '1'; } catch (e) {}
+
   // ---- Voice ----
   function say(text) {
     if (!('speechSynthesis' in window)) return;
@@ -189,6 +194,7 @@
     view = fit(T.g.minX, T.g.maxX - T.g.minX, W - 2 * side, H, 60);
     view.ox += side;
     draw();
+    if (fun) loop();
   }
 
   function draw() {
@@ -202,21 +208,87 @@
     drawStrokes(ctx, g, COLORS.road, ROAD);
 
     // Finished strokes
-    ctx.strokeStyle = ctx.fillStyle = T.finished ? COLORS.ok : COLORS.ink;
-    ctx.lineWidth = INK;
-    T.inks.forEach(function (ink) { polyline(ctx, ink); });
+    T.inks.forEach(function (ink) { drawInk(ink, T.finished ? COLORS.ok : COLORS.ink, now); });
 
     if (T.demo) drawDemo(now);
     else if (!T.finished) drawGuide(now);
 
     // Ink in progress, or ink that just went off the path (fades out in red)
-    ctx.lineWidth = INK;
-    if (T.ink) { ctx.strokeStyle = COLORS.ink; polyline(ctx, T.ink); }
+    if (T.ink) drawInk(T.ink, COLORS.ink, now);
     if (T.fail) {
       var a = 1 - (now - T.fail.t) / 600;
       if (a <= 0) T.fail = null;
-      else { ctx.globalAlpha = a; ctx.strokeStyle = COLORS.err; polyline(ctx, T.fail.ink); ctx.globalAlpha = 1; }
+      else { ctx.globalAlpha = a; ctx.lineWidth = INK; ctx.strokeStyle = COLORS.err; polyline(ctx, T.fail.ink); ctx.globalAlpha = 1; }
     }
+    if (fun) drawSparks(now);
+  }
+
+  // Plain ink, or in festive mode a shiny rainbow ribbon whose colours keep flowing
+  function drawInk(pts, color, now) {
+    ctx.lineWidth = INK;
+    if (!fun) {
+      ctx.strokeStyle = ctx.fillStyle = color;
+      polyline(ctx, pts);
+      return;
+    }
+    rainbow(pts, now / 6, INK);
+    if (pts.length > 1) {
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = INK * 0.22;
+      polyline(ctx, pts);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  function rainbow(pts, h0, width) {
+    function hue(i) { return 'hsl(' + Math.round(h0 - i * 4) % 360 + ', 85%, 55%)'; }
+    if (pts.length === 1) { ctx.fillStyle = hue(0); disc(ctx, pts[0], width / 2); return; }
+    ctx.lineWidth = width;
+    for (var i = 1; i < pts.length; i++) {
+      ctx.strokeStyle = hue(i);
+      ctx.beginPath();
+      ctx.moveTo(pts[i - 1][0], pts[i - 1][1]);
+      ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.stroke();
+    }
+  }
+
+  // Sparkles: a few follow the finger, a big burst when the letter is done
+  var sparks = [], lastSparkTime = 0;
+  function spark(p, n, burst) {
+    var now = performance.now();
+    for (var i = 0; i < n; i++) {
+      var a = Math.random() * Math.PI * 2, v = burst ? 40 + Math.random() * 120 : 10 + Math.random() * 30;
+      sparks.push({
+        x: p[0], y: p[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v - (burst ? 70 : 0),
+        h: Math.random() * 360, t0: now, life: burst ? 1500 : 650,
+        r: burst ? 2 + Math.random() * 2.5 : 1.5 + Math.random() * 1.5
+      });
+    }
+  }
+
+  function drawSparks(now) {
+    var dt = Math.min(0.05, (now - (lastSparkTime || now)) / 1000);
+    lastSparkTime = now;
+    sparks = sparks.filter(function (s) { return now - s.t0 < s.life; });
+    sparks.forEach(function (s) {
+      s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 140 * dt;
+      var a = 1 - (now - s.t0) / s.life, r = s.r * (0.5 + a * 0.7);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'hsl(' + s.h + ', 90%, 58%)';
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y - 2 * r);
+      ctx.lineTo(s.x + 0.5 * r, s.y - 0.5 * r);
+      ctx.lineTo(s.x + 2 * r, s.y);
+      ctx.lineTo(s.x + 0.5 * r, s.y + 0.5 * r);
+      ctx.lineTo(s.x, s.y + 2 * r);
+      ctx.lineTo(s.x - 0.5 * r, s.y + 0.5 * r);
+      ctx.lineTo(s.x - 2 * r, s.y);
+      ctx.lineTo(s.x - 0.5 * r, s.y - 0.5 * r);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
   }
 
   // Dashed path, arrows and numbered start dot for the stroke to trace now
@@ -287,7 +359,8 @@
         disc(ctx, st.dot, INK / 2 * f + 1);
       } else {
         var n = Math.max(1, Math.round(f * st.pts.length));
-        polyline(ctx, st.pts, n);
+        if (fun) drawInk(st.pts.slice(0, n), null, now);
+        else polyline(ctx, st.pts, n);
         if (f < 1) {
           ctx.globalAlpha = 0.35;
           disc(ctx, st.pts[n - 1], 12);
@@ -304,7 +377,7 @@
     raf = requestAnimationFrame(function () {
       if ($('trace').hidden || !T) return;
       draw();
-      if (T.demo || T.hint || T.fail) loop();
+      if (T.demo || T.hint || T.fail || fun) loop();
     });
   }
 
@@ -345,6 +418,7 @@
     if (best > OFF_TOL) { failStroke(); return; }
     if (bi > T.prog) T.prog = bi;
     T.ink.push(q);
+    if (fun && Math.random() < 0.15) spark(q, 1, false);
     if (T.prog >= pts.length - 1) strokeDone(T.ink);
   }
 
@@ -380,6 +454,10 @@
     saveDone();
     $('win').hidden = false;
     say('Bravo !');
+    if (fun) T.g.strokes.forEach(function (st) {
+      var pts = st.dot ? [st.dot] : st.pts;
+      for (var i = 0; i < pts.length; i += 12) spark(pts[i], 2, true);
+    });
   }
 
   canvas.addEventListener('pointerdown', function (e) {
@@ -425,6 +503,16 @@
   $('watch').onclick = function () { say(G.name(T.ch)); startDemo(); };
   $('restart').onclick = function () { reset(); draw(); };
   $('again').onclick = function () { reset(); draw(); };
+
+  function setFun(on) {
+    fun = on;
+    try { localStorage.setItem(FUN_KEY, on ? '1' : '0'); } catch (e) {}
+    $('fun').setAttribute('aria-pressed', String(on));
+    sparks = [];
+    if (T && !$('trace').hidden) { draw(); loop(); }
+  }
+  $('fun').onclick = function () { setFun(!fun); };
+  setFun(fun);
   $('go-next').onclick = function () {
     if (T.i < T.set.chars.length - 1) goTo(T.i + 1);
     else location.hash = '#' + T.set.id;

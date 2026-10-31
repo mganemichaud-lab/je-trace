@@ -5,7 +5,8 @@ Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capita
 - The letter writes itself first (orange), then the learner traces it with a finger or Apple Pencil, starting at the green dot.
 - A stroke only counts when it starts at the dot, goes the right way and reaches the end. Otherwise the ink fades in red and the dot pulses.
 - Finished letters get a green check, remembered on the iPad.
-- Buttons: hear the letter name, watch again, start over, previous / next.
+- Buttons: festive mode on/off, hear the letter name, watch again, start over, previous / next.
+- Festive mode (sparkle button, remembered on the iPad): flowing rainbow ink, sparkles while tracing and a burst at the end. Calm mode: plain ink.
 
 ## Files
 

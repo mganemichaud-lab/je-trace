@@ -89,6 +89,15 @@ html, body {
 .btn.big { width: 84px; height: 84px; border-radius: 22px; }
 .btn.big svg { width: 40px; height: 40px; }
 .btn.primary { background: var(--ok); color: #fff; }
+.fun-toggle[aria-pressed="true"] {
+  background: linear-gradient(135deg, #ff5f8f, #ffb347, #4fd18b, #4f8cff, #b16cff);
+  background-size: 300% 300%;
+  color: #fff;
+  animation: flow 4s linear infinite;
+}
+@keyframes flow {
+  50% { background-position: 100% 100%; }
+}
 .btn.pulse { animation: pulse .9s ease-in-out 2; }
 .btn-space { width: 60px; }
 
