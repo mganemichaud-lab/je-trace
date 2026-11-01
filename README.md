@@ -1,6 +1,6 @@
 # Je trace
 
-Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capitals A–Z and numbers 0–9.
+Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capitals A–Z, numbers 0–9 and 19 everyday symbols (+ − × = % € @ & # * / ( ) . , ' : ? !).
 
 - The letter writes itself first (orange), then the learner traces it with a finger or Apple Pencil, starting at the green dot.
 - A stroke only counts when it starts at the dot, goes the right way and reaches the end. Otherwise the ink fades in red and the dot pulses.

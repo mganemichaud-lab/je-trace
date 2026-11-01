@@ -117,7 +117,30 @@
     '6': [S().m(45, 3).bez(15, 10, 2, 40, 2, 72).arc(26, 72, 24, 28, 180, -180)],
     '7': [L(0, 0, 50, 0).to(15, 100)],
     '8': [O(25, 24, 20, 24, -30, -270).arc(25, 74, 25, 26, -90, 270).arc(25, 24, 20, 24, 90, -30)],
-    '9': [O(25, 28, 24, 28, 0, -360).to(49, 100)]
+    '9': [O(25, 28, 24, 28, 0, -360).to(49, 100)],
+
+    // ---- symboles ----
+    '+': [L(25, 30, 25, 80), L(0, 55, 50, 55)],
+    '-': [L(0, 55, 40, 55)],
+    '×': [L(5, 35, 45, 75), L(45, 35, 5, 75)],
+    '=': [L(0, 42, 50, 42), L(0, 68, 50, 68)],
+    '%': [O(12, 18, 12, 16, -90, -450), L(55, 0, 5, 100), O(48, 82, 12, 16, -90, -450)],
+    '€': [O(42, 50, 35, 50, -40, -320), L(0, 40, 50, 40), L(0, 60, 50, 60)],
+    '@': [O(40, 55, 14, 17, -30, -390).to(54, 38).to(54, 68)
+            .bez(60, 78, 78, 72, 80, 52).arc(40, 52, 40, 45, 0, -300)],
+    '&': [S().m(58, 100).to(15, 32).arc(28, 22, 15, 20, 150, 400).to(6, 70)
+            .bez(2, 95, 20, 103, 32, 100).bez(45, 97, 55, 85, 60, 62)],
+    '#': [L(22, 5, 15, 100), L(47, 5, 40, 100), L(0, 35, 62, 35), L(0, 70, 58, 70)],
+    '*': [L(25, 15, 25, 75), L(0, 30, 50, 60), L(50, 30, 0, 60)],
+    '/': [L(40, 0, 0, 100)],
+    '(': [O(40, 50, 35, 55, -120, -240)],
+    ')': [O(0, 50, 35, 55, -60, 60)],
+    '.': [dot(0, 94)],
+    ',': [L(6, 88, 0, 114)],
+    "'": [L(6, 0, 2, 25)],
+    ':': [dot(0, 58), dot(0, 94)],
+    '?': [O(25, 25, 23, 24, 190, 360).bez(48, 45, 25, 48, 25, 62).to(25, 72), dot(25, 94)],
+    '!': [L(0, 0, 0, 70), dot(0, 94)]
   };
 
   // Even spacing so progress along a stroke can be measured in steps
@@ -155,7 +178,11 @@
     k: 'ka', l: 'èle', m: 'ème', n: 'ène', o: 'o', p: 'pé', q: 'ku', r: 'ère', s: 'èsse', t: 'té',
     u: 'u', v: 'vé', w: 'double vé', x: 'ixe', y: 'i grec', z: 'zède',
     '0': 'zéro', '1': 'un', '2': 'deux', '3': 'trois', '4': 'quatre',
-    '5': 'cinq', '6': 'six', '7': 'sept', '8': 'huit', '9': 'neuf'
+    '5': 'cinq', '6': 'six', '7': 'sept', '8': 'huit', '9': 'neuf',
+    '+': 'plus', '-': 'moins', '×': 'fois', '=': 'égal', '%': 'pour cent', '€': 'euro',
+    '@': 'arobase', '&': 'et', '#': 'dièse', '*': 'étoile', '/': 'barre oblique',
+    '(': 'parenthèse ouvrante', ')': 'parenthèse fermante', '.': 'point', ',': 'virgule',
+    "'": 'apostrophe', ':': 'deux-points', '?': "point d'interrogation", '!': "point d'exclamation"
   };
 
   window.GLYPHS = {
@@ -163,7 +190,8 @@
     sets: [
       { id: 'min', title: 'Minuscules', sample: 'abc', chars: 'abcdefghijklmnopqrstuvwxyz'.split('') },
       { id: 'maj', title: 'Majuscules', sample: 'ABC', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
-      { id: 'chi', title: 'Chiffres', sample: '123', chars: '0123456789'.split('') }
+      { id: 'chi', title: 'Chiffres', sample: '123', chars: '0123456789'.split('') },
+      { id: 'sym', title: 'Symboles', sample: '@&+', chars: "+-×=%€@&#*/().,':?!".split('') }
     ],
     glyph: glyph,
     name: function (ch) { return NAMES[ch.toLowerCase()] || ch; }
