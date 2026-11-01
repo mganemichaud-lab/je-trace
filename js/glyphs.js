@@ -125,7 +125,6 @@
     '×': [L(5, 35, 45, 75), L(45, 35, 5, 75)],
     '=': [L(0, 42, 50, 42), L(0, 68, 50, 68)],
     '%': [O(12, 18, 12, 16, -90, -450), L(55, 0, 5, 100), O(48, 82, 12, 16, -90, -450)],
-    '€': [O(42, 50, 35, 50, -40, -320), L(0, 40, 50, 40), L(0, 60, 50, 60)],
     '@': [O(40, 55, 14, 17, -30, -390).to(54, 38).to(54, 68)
             .bez(60, 78, 78, 72, 80, 52).arc(40, 52, 40, 45, 0, -300)],
     '&': [S().m(58, 100).to(15, 32).arc(28, 22, 15, 20, 150, 400).to(6, 70)
@@ -139,6 +138,7 @@
     ',': [L(6, 88, 0, 114)],
     "'": [L(6, 0, 2, 25)],
     ':': [dot(0, 58), dot(0, 94)],
+    ';': [dot(3, 58), L(6, 88, 0, 114)],
     '?': [O(25, 25, 23, 24, 190, 360).bez(48, 45, 25, 48, 25, 62).to(25, 72), dot(25, 94)],
     '!': [L(0, 0, 0, 70), dot(0, 94)]
   };
@@ -179,10 +179,10 @@
     u: 'u', v: 'vé', w: 'double vé', x: 'ixe', y: 'i grec', z: 'zède',
     '0': 'zéro', '1': 'un', '2': 'deux', '3': 'trois', '4': 'quatre',
     '5': 'cinq', '6': 'six', '7': 'sept', '8': 'huit', '9': 'neuf',
-    '+': 'plus', '-': 'moins', '×': 'fois', '=': 'égal', '%': 'pour cent', '€': 'euro',
+    '+': 'plus', '-': 'moins', '×': 'fois', '=': 'égal', '%': 'pour cent',
     '@': 'arobase', '&': 'et', '#': 'dièse', '*': 'étoile', '/': 'barre oblique',
     '(': 'parenthèse ouvrante', ')': 'parenthèse fermante', '.': 'point', ',': 'virgule',
-    "'": 'apostrophe', ':': 'deux-points', '?': "point d'interrogation", '!': "point d'exclamation"
+    "'": 'apostrophe', ':': 'deux-points', ';': 'point-virgule','?': "point d'interrogation", '!': "point d'exclamation"
   };
 
   window.GLYPHS = {
@@ -191,7 +191,7 @@
       { id: 'min', title: 'Minuscules', sample: 'abc', chars: 'abcdefghijklmnopqrstuvwxyz'.split('') },
       { id: 'maj', title: 'Majuscules', sample: 'ABC', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
       { id: 'chi', title: 'Chiffres', sample: '123', chars: '0123456789'.split('') },
-      { id: 'sym', title: 'Symboles', sample: '@&+', chars: "+-×=%€@&#*/().,':?!".split('') }
+      { id: 'sym', title: 'Symboles', sample: '@&+', chars: "+-×=%@&#*/().,':;?!".split('') }
     ],
     glyph: glyph,
     name: function (ch) { return NAMES[ch.toLowerCase()] || ch; }
