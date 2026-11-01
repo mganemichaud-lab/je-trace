@@ -10,7 +10,7 @@ Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capita
 
 ## Test
 
-The orange button at the top right of a list starts a test of 5 characters from that set (ones not passed yet come first). For each one:
+The **Test** card on the home screen starts a test of 5 characters mixed from all four sets; the orange button at the top right of a list tests only that set. Characters not passed yet come first. For each one:
 
 1. **Copy**: the model is on the left, the learner writes it in the empty space on the right, on the same lines.
 2. **From memory**: the model fades away, the name is spoken, and the learner writes it again.

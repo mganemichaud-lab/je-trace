@@ -144,6 +144,15 @@
       box.appendChild(a);
       drawSample(a.querySelector('canvas'), set.sample.split(''));
     });
+    // The test of everything, mixed
+    var a = document.createElement('a');
+    a.className = 'set set-test';
+    a.href = '#test';
+    var n = MIX.chars.filter(function (ch) { return mastered.has(ch); }).length;
+    a.innerHTML = '<span class="set-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/>' +
+                  '<path d="M9 4V3h6v1M8.5 12.5l2.5 2.5 4.5-5"/></svg></span><span class="label">Test</span>' +
+                  '<span class="count">' + n + ' / ' + MIX.chars.length + '</span>';
+    box.appendChild(a);
   }
 
   function showList(set) {
@@ -548,13 +557,17 @@
     return a;
   }
 
+  // All four sets together, for the test on the home screen
+  var MIX = { id: 'test', mix: true, chars: [].concat.apply([], G.sets.map(function (s) { return s.chars; })) };
+  var SYMBOLS = G.sets.filter(function (s) { return s.id === 'sym'; })[0].chars;
+
   function showTest(set) {
     show('test');
     if (X) clearTimeout(X.timer);
     // Characters not passed yet come first
     var pool = shuffle(set.chars.slice()).sort(function (a, b) { return mastered.has(a) - mastered.has(b); });
     X = { set: set, items: pool.slice(0, TEST_SIZE), n: 0, results: [] };
-    $('test-quit').href = $('test-done').href = '#' + set.id;
+    $('test-quit').href = $('test-done').href = set.mix ? '#' : '#' + set.id;
     $('result').hidden = true;
     startItem();
   }
@@ -677,7 +690,7 @@
   function checkWriting() {
     if (X.state !== 'write' || !X.inks.length) return;
     X.t0 = performance.now();
-    if (CHECK(X.inks, X.g, X.set.id === 'sym')) {
+    if (CHECK(X.inks, X.g, SYMBOLS.indexOf(X.ch) >= 0)) {
       X.state = 'ok';
       if (X.phase === 'memory') say('Bravo !');
       drawTest();
@@ -792,6 +805,7 @@
     var set = G.sets.filter(function (s) { return s.id === h[0]; })[0];
     activePointer = null;
     tPointer = null;
+    if (h[0] === 'test') return showTest(MIX);
     if (!set) return showHome();
     if (h[1] === 'test') return showTest(set);
     var i = parseInt(h[1], 10);
