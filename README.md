@@ -19,6 +19,8 @@ The writing is checked against the letter model: shape, number of strokes, direc
 
 At the end, a card shows the 5 characters with a check for each one written correctly from memory. Those get an orange star in the list, remembered on the iPad.
 
+Teacher keys (with a keyboard, e.g. on the Mac): Cmd + → counts the current step as right, Cmd + ← as missed (Ctrl on Windows). Ten presses reach the result card.
+
 ## Files
 
 - `js/glyphs.js` – the letter model: shape and stroke order of every character. Edit a line there to change how a letter is written.

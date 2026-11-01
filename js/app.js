@@ -776,6 +776,16 @@
   $('test-erase').onclick = function () { if (X && X.state === 'write') { clearWriting(); drawTest(); } };
   $('test-again').onclick = function () { showTest(X.set); };
 
+  // Teacher keys, to look through a test quickly: Cmd/Ctrl + → counts the step as right, + ← as missed
+  document.addEventListener('keydown', function (e) {
+    if (!(e.metaKey || e.ctrlKey) || $('test').hidden || !X) return;
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    e.preventDefault(); // also stops the browser going back a page
+    if (X.state === 'done') return;
+    clearWriting();
+    nextStep(e.key === 'ArrowRight');
+  });
+
   // ---- Navigation: #min, #min/3, #min/test ----
   function route() {
     var h = location.hash.slice(1).split('/');
