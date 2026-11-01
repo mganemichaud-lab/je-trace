@@ -1,6 +1,6 @@
 // Keeps the app working without internet: fresh files when online, saved copies when offline.
-var VERSION = 'v1';
-var FILES = ['./', 'index.html', 'style.css', 'js/glyphs.js', 'js/app.js',
+var VERSION = 'v2';
+var FILES = ['./', 'index.html', 'style.css', 'js/glyphs.js', 'js/check.js', 'js/app.js',
              'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png'];
 
 self.addEventListener('install', function (e) {

@@ -8,10 +8,22 @@ Letter tracing for adult literacy learners, on the iPad: lowercase a–z, capita
 - Buttons: festive mode on/off, hear the letter name, watch again, start over, previous / next.
 - Festive mode (sparkle button, remembered on the iPad): flowing rainbow ink, sparkles while tracing and a burst at the end. Calm mode: plain ink.
 
+## Test
+
+The orange button at the top right of a list starts a test of 5 characters from that set (ones not passed yet come first). For each one:
+
+1. **Copy**: the model is on the left, the learner writes it in the empty space on the right, on the same lines.
+2. **From memory**: the model fades away, the name is spoken, and the learner writes it again.
+
+The writing is checked against the letter model: shape, number of strokes, direction of each stroke, and stroke order (symbols may be written in any order). Size and position may vary a little. If it is not right, the writing fades and the correct movement plays in the writing space; after 2 tries it moves on. The check happens when all strokes are there, or after a 3½ s pause.
+
+At the end, a card shows the 5 characters with a check for each one written correctly from memory. Those get an orange star in the list, remembered on the iPad.
+
 ## Files
 
 - `js/glyphs.js` – the letter model: shape and stroke order of every character. Edit a line there to change how a letter is written.
-- `js/app.js` – screens, finger checking, demo animation.
+- `js/app.js` – screens, finger checking, demo animation, test.
+- `js/check.js` – checks free writing in the test; its tolerances are at the top.
 - `planche.html` – review sheet of every character with numbered, coloured strokes (printable).
 - `style.css`, `index.html`
 - `manifest.webmanifest`, `sw.js`, `icons/` – home-screen icon and offline use.

@@ -24,6 +24,15 @@
     try { localStorage.setItem(STORE, JSON.stringify(Array.from(done))); } catch (e) {}
   }
 
+  // Characters passed in the self-test (written from memory)
+  var TEST_STORE = 'jetrace-test';
+  var mastered = (function () {
+    try { return new Set(JSON.parse(localStorage.getItem(TEST_STORE) || '[]')); } catch (e) { return new Set(); }
+  })();
+  function saveMastered() {
+    try { localStorage.setItem(TEST_STORE, JSON.stringify(Array.from(mastered))); } catch (e) {}
+  }
+
   // Calm mode (plain ink) or festive mode (flowing rainbow ink and sparkles)
   var FUN_KEY = 'jetrace-fun';
   var fun = false;
@@ -118,7 +127,7 @@
 
   // ---- Screens ----
   function show(id) {
-    ['home', 'list', 'trace'].forEach(function (s) { $(s).hidden = s !== id; });
+    ['home', 'list', 'trace', 'test'].forEach(function (s) { $(s).hidden = s !== id; });
   }
 
   function showHome() {
@@ -140,11 +149,12 @@
   function showList(set) {
     show('list');
     $('list-title').textContent = set.title;
+    $('to-test').href = '#' + set.id + '/test';
     var grid = $('grid');
     grid.innerHTML = '';
     set.chars.forEach(function (ch, i) {
       var a = document.createElement('a');
-      a.className = 'tile' + (done.has(ch) ? ' done' : '');
+      a.className = 'tile' + (done.has(ch) ? ' done' : '') + (mastered.has(ch) ? ' mastered' : '');
       a.href = '#' + set.id + '/' + i;
       a.setAttribute('aria-label', ch);
       a.innerHTML = '<canvas></canvas>';
@@ -208,13 +218,13 @@
     drawStrokes(ctx, g, COLORS.road, ROAD);
 
     // Finished strokes
-    T.inks.forEach(function (ink) { drawInk(ink, T.finished ? COLORS.ok : COLORS.ink, now); });
+    T.inks.forEach(function (ink) { drawInk(ctx, ink, T.finished ? COLORS.ok : COLORS.ink, now); });
 
     if (T.demo) drawDemo(now);
     else if (!T.finished) drawGuide(now);
 
     // Ink in progress, or ink that just went off the path (fades out in red)
-    if (T.ink) drawInk(T.ink, COLORS.ink, now);
+    if (T.ink) drawInk(ctx, T.ink, COLORS.ink, now);
     if (T.fail) {
       var a = 1 - (now - T.fail.t) / 600;
       if (a <= 0) T.fail = null;
@@ -224,14 +234,14 @@
   }
 
   // Plain ink, or in festive mode a shiny rainbow ribbon whose colours keep flowing
-  function drawInk(pts, color, now) {
+  function drawInk(ctx, pts, color, now) {
     ctx.lineWidth = INK;
     if (!fun) {
       ctx.strokeStyle = ctx.fillStyle = color;
       polyline(ctx, pts);
       return;
     }
-    rainbow(pts, now / 6, INK);
+    rainbow(ctx, pts, now / 6, INK);
     if (pts.length > 1) {
       ctx.globalAlpha = 0.45;
       ctx.strokeStyle = '#fff';
@@ -241,7 +251,7 @@
     }
   }
 
-  function rainbow(pts, h0, width) {
+  function rainbow(ctx, pts, h0, width) {
     function hue(i) { return 'hsl(' + Math.round(h0 - i * 4) % 360 + ', 85%, 55%)'; }
     if (pts.length === 1) { ctx.fillStyle = hue(0); disc(ctx, pts[0], width / 2); return; }
     ctx.lineWidth = width;
@@ -347,21 +357,27 @@
   }
 
   function drawDemo(now) {
-    var t = now - T.demo.t0, strokes = T.g.strokes;
-    ctx.strokeStyle = ctx.fillStyle = COLORS.accent;
-    ctx.lineWidth = INK;
+    if (!drawWriting(ctx, T.g, now - T.demo.t0, now)) T.demo = null;
+  }
+
+  // The strokes of g writing themselves, t ms after the start; false once finished
+  function drawWriting(ctx, g, t, now) {
+    var strokes = g.strokes;
     ctx.lineCap = ctx.lineJoin = 'round';
     for (var k = 0; k < strokes.length; k++) {
       var st = strokes[k], dur = strokeTime(st);
       if (t <= 0) break;
       var f = Math.min(1, t / dur);
+      ctx.strokeStyle = ctx.fillStyle = COLORS.accent;
+      ctx.lineWidth = INK;
       if (st.dot) {
         disc(ctx, st.dot, INK / 2 * f + 1);
       } else {
         var n = Math.max(1, Math.round(f * st.pts.length));
-        if (fun) drawInk(st.pts.slice(0, n), null, now);
+        if (fun) drawInk(ctx, st.pts.slice(0, n), null, now);
         else polyline(ctx, st.pts, n);
         if (f < 1) {
+          ctx.fillStyle = COLORS.accent;
           ctx.globalAlpha = 0.35;
           disc(ctx, st.pts[n - 1], 12);
           ctx.globalAlpha = 1;
@@ -369,7 +385,7 @@
       }
       t -= dur + 300;
     }
-    if (t > 700) T.demo = null;
+    return t <= 700;
   }
 
   function loop() {
@@ -518,12 +534,256 @@
     else location.hash = '#' + T.set.id;
   };
 
-  // ---- Navigation: #min, #min/3 ----
+  // ---- Self-test: copy beside the model, then write from memory ----
+  var TEST_SIZE = 5;   // characters per test
+  var TRIES = 2;       // tries per step before moving on
+  var tcanvas = $('test-canvas'), tctx, tview, TW, TH;
+  var X = null;        // the test in progress
+  var traf = 0, tPointer = null;
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function showTest(set) {
+    show('test');
+    if (X) clearTimeout(X.timer);
+    // Characters not passed yet come first
+    var pool = shuffle(set.chars.slice()).sort(function (a, b) { return mastered.has(a) - mastered.has(b); });
+    X = { set: set, items: pool.slice(0, TEST_SIZE), n: 0, results: [] };
+    $('test-quit').href = $('test-done').href = '#' + set.id;
+    $('result').hidden = true;
+    startItem();
+  }
+
+  function startItem() {
+    X.ch = X.items[X.n];
+    X.g = G.glyph(X.ch);
+    X.phase = 'copy';
+    X.tries = 0;
+    X.hidden = 0;
+    clearWriting();
+    showDots();
+    testResize();
+    say(G.name(X.ch));
+  }
+
+  // state: 'write' (waiting for the learner), 'ok' (right), 'fade' then 'demo' (not yet), 'done'
+  function clearWriting() {
+    clearTimeout(X.timer);
+    X.inks = [];
+    X.ink = null;
+    X.state = 'write';
+  }
+
+  function later(fn, ms) {
+    var mine = X;
+    clearTimeout(X.timer);
+    X.timer = setTimeout(function () { if (X === mine && !$('test').hidden) fn(); }, ms);
+  }
+
+  function showDots() {
+    $('test-dots').innerHTML = X.items.map(function (ch, i) {
+      var c = i < X.results.length ? (X.results[i] ? 'pass' : 'miss') : (i === X.n ? 'cur' : '');
+      return '<span class="' + c + '"></span>';
+    }).join('');
+  }
+
+  // Model on the left, writing space on the right, on the same lines; x = 0 is the line between them
+  function testResize() {
+    if ($('test').hidden || !X) return;
+    var c = sizeCanvas(tcanvas);
+    tctx = c.ctx; TW = c.w; TH = c.h;
+    var g = X.g, gw = g.maxX - g.minX, mid = (g.minX + g.maxX) / 2;
+    var modelW = gw + 70, writeW = Math.max(gw * 1.8, gw + 110);
+    tview = fit(0, modelW + writeW, TW, TH, 40);
+    tview.ox += modelW * tview.s;
+    X.modelX = -modelW / 2 - mid;
+    X.writeX = writeW / 2 - mid;
+    drawTest();
+    if (fun) testLoop();
+  }
+
+  function drawTest() {
+    var now = performance.now(), g = X.g, ctx = tctx;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, TW, TH);
+    setView(ctx, tview);
+    writingLines(ctx, tview, TW);
+
+    // The writing space lights up after a touch on the model's side
+    if (X.flash) {
+      var f = 1 - (now - X.flash) / 800;
+      if (f <= 0) X.flash = 0;
+      else {
+        ctx.fillStyle = 'rgba(224, 122, 46, ' + (0.2 * f) + ')';
+        ctx.fillRect(0, -20, (TW - tview.ox) / tview.s, 190);
+      }
+    }
+    ctx.strokeStyle = COLORS.line;
+    ctx.lineWidth = 2 / tview.s;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 170); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // The model: shown while copying, fades away for the memory step
+    var a = X.phase === 'copy' ? 1 : Math.max(0, 1 - (now - X.hidden) / 700);
+    if (a > 0) {
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(X.modelX, 0);
+      drawStrokes(ctx, g, COLORS.ink, 9);
+      ctx.restore();
+    }
+
+    // The learner's writing
+    var inks = X.ink ? X.inks.concat([X.ink]) : X.inks;
+    if (X.state === 'fade') {
+      ctx.globalAlpha = Math.max(0, 1 - (now - X.t0) / 500);
+      ctx.strokeStyle = COLORS.muted;
+      ctx.lineWidth = INK;
+      inks.forEach(function (ink) { polyline(ctx, ink); });
+      ctx.globalAlpha = 1;
+    } else if (X.state !== 'demo') {
+      ctx.lineCap = ctx.lineJoin = 'round';
+      inks.forEach(function (ink) { drawInk(ctx, ink, X.state === 'ok' ? COLORS.ok : COLORS.ink, now); });
+    }
+
+    // How it is written, in the writing space
+    if (X.state === 'demo') {
+      ctx.save();
+      ctx.translate(X.writeX, 0);
+      var going = drawWriting(ctx, g, now - X.t0, now);
+      ctx.restore();
+      if (!going) afterDemo();
+    }
+  }
+
+  function testLoop() {
+    cancelAnimationFrame(traf);
+    traf = requestAnimationFrame(function () {
+      if ($('test').hidden || !X) return;
+      drawTest();
+      var busy = X.state === 'fade' || X.state === 'demo' || X.flash ||
+                 (X.phase === 'memory' && performance.now() - X.hidden < 700);
+      if (busy || fun) testLoop();
+    });
+  }
+
+  function checkWriting() {
+    if (X.state !== 'write' || !X.inks.length) return;
+    X.t0 = performance.now();
+    if (CHECK(X.inks, X.g, X.set.id === 'sym')) {
+      X.state = 'ok';
+      if (X.phase === 'memory') say('Bravo !');
+      drawTest();
+      later(function () { nextStep(true); }, 1100);
+    } else {
+      X.tries++;
+      X.state = 'fade';
+      testLoop();
+      later(function () { X.state = 'demo'; X.t0 = performance.now(); testLoop(); }, 550);
+    }
+  }
+
+  function afterDemo() {
+    if (X.tries >= TRIES) nextStep(false);
+    else { clearWriting(); drawTest(); }
+  }
+
+  function nextStep(passed) {
+    if (X.phase === 'copy') {
+      X.phase = 'memory';
+      X.tries = 0;
+      X.hidden = performance.now();
+      clearWriting();
+      testLoop();
+      say(G.name(X.ch));
+      return;
+    }
+    X.results.push(passed);
+    if (passed) { mastered.add(X.ch); saveMastered(); }
+    X.n++;
+    if (X.n < X.items.length) startItem();
+    else finishTest();
+  }
+
+  function finishTest() {
+    clearWriting();
+    X.state = 'done';
+    showDots();
+    drawTest();
+    var row = $('result-row');
+    row.innerHTML = '';
+    $('result').hidden = false; // visible first, so the small pictures get their size
+    X.items.forEach(function (ch, i) {
+      var d = document.createElement('div');
+      d.className = 'result-item' + (X.results[i] ? ' pass' : '');
+      d.innerHTML = '<canvas></canvas><span class="mark"></span>';
+      row.appendChild(d);
+      drawSample(d.querySelector('canvas'), [ch]);
+    });
+  }
+
+  function tUnits(e) {
+    var r = tcanvas.getBoundingClientRect();
+    return [(e.clientX - r.left - tview.ox) / tview.s, (e.clientY - r.top - tview.oy) / tview.s];
+  }
+
+  tcanvas.addEventListener('pointerdown', function (e) {
+    if (tPointer !== null || !X || X.state !== 'write') return;
+    e.preventDefault();
+    var p = tUnits(e);
+    if (p[0] < 0) { X.flash = performance.now(); testLoop(); return; } // shows where to write
+    tPointer = e.pointerId;
+    try { tcanvas.setPointerCapture(e.pointerId); } catch (err) {}
+    clearTimeout(X.timer);
+    X.ink = [p];
+    drawTest();
+  });
+
+  tcanvas.addEventListener('pointermove', function (e) {
+    if (e.pointerId !== tPointer || !X.ink) return;
+    var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    (evs.length ? evs : [e]).forEach(function (ev) { X.ink.push(tUnits(ev)); });
+    drawTest();
+  });
+
+  function tRelease(e) {
+    if (e.pointerId !== tPointer) return;
+    tPointer = null;
+    if (!X.ink) return;
+    X.inks.push(X.ink);
+    X.ink = null;
+    drawTest();
+    // Checked once all the strokes are there, or after a pause
+    later(checkWriting, X.inks.length >= X.g.strokes.length ? 400 : 3500);
+  }
+  tcanvas.addEventListener('pointerup', tRelease);
+  tcanvas.addEventListener('pointercancel', tRelease);
+
+  ['touchstart', 'touchmove', 'gesturestart', 'gesturechange'].forEach(function (type) {
+    $('test-board').addEventListener(type, function (e) {
+      if (e.target === tcanvas) e.preventDefault();
+    }, { passive: false });
+  });
+
+  $('test-listen').onclick = function () { if (X) say(G.name(X.ch)); };
+  $('test-erase').onclick = function () { if (X && X.state === 'write') { clearWriting(); drawTest(); } };
+  $('test-again').onclick = function () { showTest(X.set); };
+
+  // ---- Navigation: #min, #min/3, #min/test ----
   function route() {
     var h = location.hash.slice(1).split('/');
     var set = G.sets.filter(function (s) { return s.id === h[0]; })[0];
     activePointer = null;
+    tPointer = null;
     if (!set) return showHome();
+    if (h[1] === 'test') return showTest(set);
     var i = parseInt(h[1], 10);
     if (!(i >= 0 && i < set.chars.length)) return showList(set);
     showTrace(set, i);
@@ -532,6 +792,7 @@
   window.addEventListener('hashchange', route);
   window.addEventListener('resize', function () {
     resize();
+    testResize();
     if (!$('home').hidden) showHome();
   });
   route();
@@ -541,5 +802,8 @@
   }
 
   // For testing in the browser console
-  window.jetrace = { state: function () { return T; }, view: function () { return view; } };
+  window.jetrace = {
+    state: function () { return T; }, view: function () { return view; },
+    test: function () { return X; }, testView: function () { return tview; }
+  };
 })();
