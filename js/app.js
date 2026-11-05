@@ -799,6 +799,21 @@
     nextStep(e.key === 'ArrowRight');
   });
 
+  // ---- Phones and computers: say the app is made for the iPad (once per device) ----
+  var NOTICE_KEY = 'jetrace-notice';
+  (function () {
+    var touch = navigator.maxTouchPoints > 1;                       // iPads report themselves as Macs, but with touch
+    var small = Math.min(screen.width, screen.height) < 600;        // phones
+    var seen = false;
+    try { seen = localStorage.getItem(NOTICE_KEY) === '1'; } catch (e) {}
+    if (seen || (touch && !small)) return;
+    $('notice').hidden = false;
+    $('notice-ok').onclick = function () {
+      $('notice').hidden = true;
+      try { localStorage.setItem(NOTICE_KEY, '1'); } catch (e) {}
+    };
+  })();
+
   // ---- Navigation: #min, #min/3, #min/test ----
   function route() {
     var h = location.hash.slice(1).split('/');

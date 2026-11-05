@@ -283,6 +283,46 @@ html, body {
 .result-buttons { display: flex; gap: 24px; }
 @keyframes appear { from { opacity: 0; } }
 
+/* ---- Message « optimisé pour iPad » ---- */
+.notice {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(250, 248, 243, .92);
+}
+.notice[hidden] { display: none; }
+.notice-card {
+  max-width: 420px;
+  padding: 28px 24px 24px;
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: 0 6px 24px rgba(60, 50, 30, .18);
+  text-align: center;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.notice-icon { width: 64px; height: 64px; fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.notice-icon circle { fill: var(--ink); stroke: none; }
+.notice-icon path { stroke: var(--accent); }
+.notice h2 { margin: 10px 0 12px; font-size: 24px; color: var(--ink); }
+.notice p { margin: 0 0 10px; font-size: 17px; line-height: 1.45; color: var(--text); }
+.notice-btn {
+  margin-top: 14px;
+  min-height: 52px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 16px;
+  background: var(--ink);
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   .btn { width: 48px; height: 48px; border-radius: 12px; }
   .btn svg { width: 24px; height: 24px; }
