@@ -123,7 +123,6 @@
     // ---- symboles ----
     '+': [L(25, 30, 25, 80), L(0, 55, 50, 55)],
     '-': [L(0, 55, 40, 55)],
-    '–': [L(0, 55, 60, 55)],
     '×': [L(5, 35, 45, 75), L(45, 35, 5, 75)],
     '=': [L(0, 42, 50, 42), L(0, 68, 50, 68)],
     '%': [O(12, 18, 12, 16, -90, -450), L(55, 0, 5, 100), O(48, 82, 12, 16, -90, -450)],
@@ -184,7 +183,7 @@
     u: 'u', v: 'vé', w: 'double vé', x: 'ixe', y: 'i grec', z: 'zède',
     '0': 'zéro', '1': 'un', '2': 'deux', '3': 'trois', '4': 'quatre',
     '5': 'cinq', '6': 'six', '7': 'sept', '8': 'huit', '9': 'neuf',
-    '+': 'plus', '-': 'moins', '×': 'fois', '=': 'égal', '%': 'pour cent', '–': 'tiret', '°': 'degré',
+    '+': 'plus', '-': 'moins', '×': 'fois', '=': 'égal', '%': 'pour cent', '°': 'degré',
     '«': 'guillemet ouvrant', '»': 'guillemet fermant',
     '@': 'arobase', '&': 'et', '#': 'dièse', '*': 'étoile', '/': 'barre oblique',
     '(': 'parenthèse ouvrante', ')': 'parenthèse fermante', '.': 'point', ',': 'virgule',
@@ -197,7 +196,7 @@
       { id: 'min', title: 'Minuscules', sample: 'abc', chars: 'abcdefghijklmnopqrstuvwxyz'.split('') },
       { id: 'maj', title: 'Majuscules', sample: 'ABC', chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') },
       { id: 'chi', title: 'Chiffres', sample: '123', chars: '0123456789'.split('') },
-      { id: 'sym', title: 'Symboles', sample: '@&+', chars: "+-–×=%°@&#*/()«».,':;?!".split('') }
+      { id: 'sym', title: 'Symboles', sample: '@&+', chars: "+-×=%°@&#*/()«».,':;?!".split('') }
     ],
     glyph: glyph,
     name: function (ch) { return NAMES[ch.toLowerCase()] || ch; }
