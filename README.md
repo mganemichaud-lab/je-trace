@@ -23,7 +23,7 @@ Teacher keys (with a keyboard, e.g. on the Mac): Cmd + → counts the current st
 
 ## Files
 
-- `js/glyphs.js` – the letter model: shape and stroke order of every character. Edit a line there to change how a letter is written.
+- `js/glyphs.js` – the letter model: shape and stroke order of every character. Edit a line there to change how a letter is written. Letters and numbers follow the shapes and arrows of the « Alphabet Écriture Trace Print » font; the symbols are our own (the font has no arrows for them).
 - `js/app.js` – screens, finger checking, demo animation, test.
 - `js/check.js` – checks free writing in the test; its tolerances are at the top.
 - `planche.html` – review sheet of every character with numbered, coloured strokes (printable).
