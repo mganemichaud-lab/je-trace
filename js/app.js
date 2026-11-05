@@ -799,14 +799,15 @@
     nextStep(e.key === 'ArrowRight');
   });
 
-  // ---- Phones and computers: say the app is made for the iPad (once per device) ----
+  // ---- Anything but an iPad: say the app is made for the iPad (once per device) ----
   var NOTICE_KEY = 'jetrace-notice';
   (function () {
-    var touch = navigator.maxTouchPoints > 1;                       // iPads report themselves as Macs, but with touch
-    var small = Math.min(screen.width, screen.height) < 600;        // phones
+    var ua = navigator.userAgent;
+    // iPads say "iPad", or (since iPadOS 13) pretend to be a Mac that has a touch screen
+    var iPad = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
     var seen = false;
     try { seen = localStorage.getItem(NOTICE_KEY) === '1'; } catch (e) {}
-    if (seen || (touch && !small)) return;
+    if (seen || iPad) return;
     $('notice').hidden = false;
     $('notice-ok').onclick = function () {
       $('notice').hidden = true;
