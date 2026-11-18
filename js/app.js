@@ -799,6 +799,8 @@
     nextStep(e.key === 'ArrowRight');
   });
 
+  $('year').textContent = new Date().getFullYear();
+
   // ---- Anything but an iPad: say the app is made for the iPad (once per device) ----
   var NOTICE_KEY = 'jetrace-notice';
   (function () {
