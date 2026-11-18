@@ -52,6 +52,9 @@ html, body {
   color: var(--ink);
 }
 #home .bar { justify-content: center; }
+.title-art { cursor: pointer; }
+.title-art canvas { display: block; width: 300px; height: 76px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .nav, .tools { display: flex; align-items: center; gap: 10px; }
 .current {
   min-width: 64px;

@@ -130,8 +130,66 @@
     ['home', 'list', 'trace', 'test'].forEach(function (s) { $(s).hidden = s !== id; });
   }
 
+  // ---- Title: "Je trace" writes itself, one colour per letter (tap it to see it again) ----
+  var TITLE_COLORS = ['#e07a2e', '#2f8f5b', '#2f6db5', '#8a4fb0'];
+  var titleStart = null, titleRaf = 0;
+
+  function drawTitle() {
+    var c = sizeCanvas($('title-canvas')), GAP = 14, SPACE = 30, PAD = 8, x = 0, strokes = [], k = 0;
+    'Je trace'.split('').forEach(function (ch) {
+      if (ch === ' ') { x += SPACE; return; }
+      var g = G.glyph(ch), dx = x - g.minX, color = TITLE_COLORS[k++ % TITLE_COLORS.length];
+      g.strokes.forEach(function (st) {
+        var pts = (st.dot ? [st.dot] : st.pts).map(function (p) { return [p[0] + dx, p[1]]; });
+        strokes.push({ pts: pts, color: color });
+      });
+      x += g.maxX - g.minX + GAP;
+    });
+    var w = x - GAP, s = Math.min(c.h / (100 + 2 * PAD), c.w / (w + 2 * PAD));
+    var ox = (c.w - w * s) / 2, oy = (c.h - 100 * s) / 2;
+    var speed = 0.45;  // units per ms (about 3 s for the whole title)
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function frame(now) {
+      var t = titleStart === null || reduce ? Infinity : now - titleStart;
+      c.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.ctx.clearRect(0, 0, c.w, c.h);
+      c.ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * ox, dpr * oy);
+      c.ctx.lineWidth = 11;
+      c.ctx.lineCap = c.ctx.lineJoin = 'round';
+      var tip = null;
+      for (var i = 0; i < strokes.length && t > 0; i++) {
+        var st = strokes[i], n = st.pts.length, dur = Math.max(80, n * STEP / speed);
+        var m = Math.max(1, Math.min(n, Math.ceil(n * t / dur)));
+        c.ctx.strokeStyle = c.ctx.fillStyle = st.color;
+        if (n === 1) disc(c.ctx, st.pts[0], 6.5); else polyline(c.ctx, st.pts, m);
+        if (t < dur) tip = st.pts[m - 1];
+        t -= dur + 60;
+      }
+      if (tip) { // the pencil point
+        c.ctx.globalAlpha = 0.3;
+        c.ctx.fillStyle = COLORS.ink;
+        disc(c.ctx, tip, 11);
+        c.ctx.globalAlpha = 1;
+      }
+      if (t <= 0) titleRaf = requestAnimationFrame(frame);
+      else titleStart = null;
+    }
+    cancelAnimationFrame(titleRaf);
+    frame(performance.now());
+  }
+
+  function playTitle() {
+    titleStart = performance.now();
+    drawTitle();
+  }
+  $('title-art').onclick = playTitle;
+  var titlePlayed = false;
+
   function showHome() {
     show('home');
+    if (!titlePlayed) { titlePlayed = true; titleStart = performance.now(); }
+    drawTitle();
     var box = $('sets');
     box.innerHTML = '';
     G.sets.forEach(function (set) {
